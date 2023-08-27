@@ -1,23 +1,35 @@
 const apiKey = '7SDVDZJS6TAM46GU'; // Alpha Vantage API key
-const stockSymbol = 'AAPL'; // Example stock symbol (Apple Inc.)
 
-// Fetch live stock data from Alpha Vantage API
-axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${stockSymbol}&interval=5min&apikey=${apiKey}`)
-    .then(response => {
-        const stockData = response.data['Time Series (5min)'];
+document.addEventListener('DOMContentLoaded', () => {
+    const searchButton = document.getElementById('search-button');
+    const searchInput = document.getElementById('search-input');
+    const stockTicker = document.getElementById('stock-ticker');
+    const stockChart = document.getElementById('stock-chart').getContext('2d');
 
-        // Extract date and closing price for Chart.js
-        const dates = Object.keys(stockData).reverse();
-        const closingPrices = dates.map(date => parseFloat(stockData[date]['4. close']));
+    searchButton.addEventListener('click', () => {
+        const companyName = searchInput.value;
+        if (companyName) {
+            fetchStockData(companyName);
+        }
+    });
 
-        // Display current price in the ticker
-        const latestDate = dates[0];
-        const currentPrice = closingPrices[0];
-        const stockTicker = document.getElementById('stock-ticker');
-        stockTicker.innerHTML = `Current Price of ${stockSymbol}: $${currentPrice.toFixed(2)}`;
+    function fetchStockData(companyName) {
+        axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${companyName}&interval=5min&apikey=${apiKey}`)
+            .then(response => {
+                const stockData = response.data['Time Series (5min)'];
+                const dates = Object.keys(stockData).reverse();
+                const closingPrices = dates.map(date => parseFloat(stockData[date]['4. close']));
 
-        // Create a line chart using Chart.js
-        const stockChart = document.getElementById('stock-chart').getContext('2d');
+                const latestDate = dates[0];
+                const currentPrice = closingPrices[0];
+                stockTicker.innerHTML = `Current Price of ${companyName}: $${currentPrice.toFixed(2)}`;
+
+                renderStockChart(dates, closingPrices);
+            })
+            .catch(error => console.error('Error fetching stock data:', error));
+    }
+
+    function renderStockChart(dates, closingPrices) {
         new Chart(stockChart, {
             type: 'line',
             data: {
@@ -45,5 +57,5 @@ axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbo
                 }
             }
         });
-    })
-    .catch(error => console.error('Error fetching stock data:', error));
+    }
+});

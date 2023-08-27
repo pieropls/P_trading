@@ -4,28 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>P Trading</title>
+    <title>Live Trading</title>
 </head>
 <body>
-    <nav>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Live Stocks</a></li>
-        </ul>
-    </nav>
-
     <header>
-        <h1>Welcome to P Trading</h1>
-        <p>Your source for live stock market data.</p>
+        <h1>Live Trading</h1>
     </header>
 
-    <section id="live-stocks">
-        <h2>Live Stock Prices</h2>
-        <div id="stock-ticker"></div>
-        <div id="stock-graph">
-            <canvas id="stock-chart"></canvas>
-        </div>
-    </section>
+    <main>
+        <section id="search">
+            <input type="text" id="search-input" placeholder="Search for a company">
+            <button id="search-button">Search</button>
+        </section>
+
+        <section id="stock-info">
+            <div id="stock-ticker"></div>
+            <div id="stock-graph">
+                <canvas id="stock-chart"></canvas>
+            </div>
+        </section>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
