@@ -1,28 +1,49 @@
-const fetchButton = document.getElementById('fetch-button');
-const stockSymbolInput = document.getElementById('symbol');
-const stockSymbolSpan = document.getElementById('stock-symbol');
-const stockPriceSpan = document.getElementById('stock-price');
-const stockChangeSpan = document.getElementById('stock-change');
-const stockInfo = document.querySelector('.stock-info');
+const apiKey = '7SDVDZJS6TAM46GU'; // Alpha Vantage API key
+const stockSymbol = 'AAPL'; // Example stock symbol (Apple Inc.)
 
-fetchButton.addEventListener('click', () => {
-    const symbol = stockSymbolInput.value.toUpperCase(); // Convert to uppercase
-    const dummyData = generateDummyData(); // Replace with actual data fetching
+// Fetch live stock data from Alpha Vantage API
+axios.get(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${stockSymbol}&interval=5min&apikey=${apiKey}`)
+    .then(response => {
+        const stockData = response.data['Time Series (5min)'];
 
-    stockSymbolSpan.textContent = symbol;
-    stockPriceSpan.textContent = `$${dummyData.price.toFixed(2)}`;
-    stockChangeSpan.textContent = `${dummyData.change.toFixed(2)}%`;
+        // Extract date and closing price for Chart.js
+        const dates = Object.keys(stockData).reverse();
+        const closingPrices = dates.map(date => parseFloat(stockData[date]['4. close']));
 
-    stockInfo.style.display = 'block';
-});
+        // Display current price in the ticker
+        const latestDate = dates[0];
+        const currentPrice = closingPrices[0];
+        const stockTicker = document.getElementById('stock-ticker');
+        stockTicker.innerHTML = `Current Price of ${stockSymbol}: $${currentPrice.toFixed(2)}`;
 
-function generateDummyData() {
-    // Generate dummy stock data (replace with actual data)
-    const price = Math.random() * 200;
-    const change = Math.random() * 10 - 5;
-
-    return {
-        price,
-        change,
-    };
-}
+        // Create a line chart using Chart.js
+        const stockChart = document.getElementById('stock-chart').getContext('2d');
+        new Chart(stockChart, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Closing Price',
+                    data: closingPrices,
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.2)',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Error fetching stock data:', error));
